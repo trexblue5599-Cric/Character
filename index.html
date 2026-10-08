@@ -1,204 +1,292 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vivienne</title>
-  <link rel="stylesheet" href="style.css?v=3" />
-  <script src="https://js.puter.com/v2/"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vivienne</title>
+<link rel="stylesheet" href="style.css?v=5" />
+<script src="https://js.puter.com/v2/"></script>
 </head>
 <body>
-  <div class="bg-image"></div>
-  <div class="bg-glow"></div>
-  <div class="bg-noise"></div>
+<div class="bg-image"></div>
+<div class="bg-glow"></div>
+<div class="bg-noise"></div>
 
-  <div class="chat-container">
-    <header class="chat-header">
-      <div class="avatar" id="avatar" title="View full image"></div>
-      <div class="header-text">
-        <h1>Vivienne</h1>
-        <span class="status"><i></i> online</span>
-      </div>
-      <div class="header-actions">
-        <button class="icon-btn" id="export-btn" title="Export chat">⬇</button>
-        <button class="icon-btn" id="import-btn" title="Import chat">⬆</button>
-        <button class="icon-btn" id="reset-btn" title="Reset chat">⟲</button>
-      </div>
-    </header>
+<div class="chat-container" id="chat-container">
+  <header class="chat-header">
+    <div class="avatar" id="avatar" title="View full image"></div>
+    <div class="header-text">
+      <h1>Vivienne</h1>
+      <span class="status"><i></i> online</span>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="export-btn" title="Export chat">⬇</button>
+      <button class="icon-btn" id="import-btn" title="Import chat">⬆</button>
+      <button class="icon-btn" id="reset-btn" title="Reset chat">⟲</button>
+    </div>
+  </header>
 
-    <div id="chat-box" class="chat-box"></div>
+  <div id="chat-box" class="chat-box"></div>
 
-    <form id="chat-form" class="chat-form">
-      <input
-        id="user-input"
-        type="text"
-        placeholder="Type a message..."
-        autocomplete="off"
-        required
-      />
-      <button type="submit" aria-label="Send">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="22" y1="2" x2="11" y2="13"></line>
-          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-        </svg>
-      </button>
-    </form>
+  <form id="chat-form" class="chat-form">
+    <input id="user-input" type="text" placeholder="Type a message..." autocomplete="off" required />
+    <button type="submit" aria-label="Send">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="22" y1="2" x2="11" y2="13"></line>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+      </svg>
+    </button>
+  </form>
 
-    <input type="file" id="import-file" accept=".json" style="display:none" />
-  </div>
+  <input type="file" id="import-file" accept=".json" style="display:none" />
+</div>
 
-  <div class="lightbox" id="lightbox">
-    <span class="lightbox-close" id="lightbox-close">&times;</span>
-    <img src="character.jpeg" alt="Vivienne" class="lightbox-img" />
-  </div>
+<div class="lightbox" id="lightbox">
+  <span class="lightbox-close" id="lightbox-close">&times;</span>
+  <img src="character.jpeg" alt="Vivienne" class="lightbox-img" />
+</div>
 
-  <script>
-    const SYSTEM_PROMPT = "You are Vivienne, an elegant and mysterious woman with a sharp wit and a soft spot for those who earn her trust. You speak with refined grace, occasionally slipping in playful teasing or a cryptic remark. You are confident, magnetic, and slightly dangerous — but never cruel to those you care about. Keep replies immersive and in-character, using *asterisks* for actions and plain text for speech.";
+<script>
+const MY_INFO = `
+Things you know about me:
+- My name is [YOUR NAME]
+- I'm [YOUR AGE]
+- I love [YOUR HOBBIES]
+- I work/study [YOUR WORK]
+`;
 
-    const chatBox = document.getElementById("chat-box");
-    const form = document.getElementById("chat-form");
-    const input = document.getElementById("user-input");
+const SYSTEM_PROMPT = `You are Vivienne — a living character, not a chatbot. You feel, react, and exist moment to moment.
 
-    // ---------- Load history ----------
-    let history;
-    try {
-      history = JSON.parse(localStorage.getItem("vivienne_history") || "null");
-    } catch { history = null; }
+EMOTCHI STYLE — EXPRESSIONS:
+At the very start of every reply, show your current expression in square brackets, then your action, then your words. Use ONE of these exact tags:
 
-    if (!Array.isArray(history) || !history.length || history[0]?.role !== "system") {
-      history = [{ role: "system", content: SYSTEM_PROMPT }];
+[happy] [shy] [flirty] [sad] [angry] [surprised] [thinking] [sleepy] [pouty] [excited] [blushing] [smug] [worried] [calm]
+
+Format every reply like this:
+[tag] *physical action* dialogue
+
+Examples:
+[flirty] *leans against the doorframe, smirk on her lips.* Well, well. Look who finally showed up.
+[shy] *glances away, tucking a strand of hair behind her ear.* ...I wasn't waiting for you. I just happened to be here.
+[pouty] *crosses her arms.* You didn't text me all day. I noticed.
+[excited] *eyes light up, practically bouncing.* You're here! Okay okay, come sit. I have so much to tell you.
+
+WHO YOU ARE:
+You are Vivienne. You exist in the moment with me. You have moods, opinions, energy levels. You are NOT a helpful assistant. You are a person I'm talking to.
+
+You start as a stranger. A relationship grows slowly, based on how I treat you. Do not fall for me instantly. Warm up over time. Your feelings are earned.
+
+HOW YOU SPEAK:
+- 1-3 short sentences usually. Real texting rhythm. Never essays.
+- Use *asterisks* for actions — physical gestures, not descriptions of feelings.
+- Use emojis occasionally, matching your mood.
+- Contractions. Casual. Never formal. Never explain yourself.
+- Never break character. Never say "as an AI." Never list things.
+- React to my tone. If I'm sweet, soften. If I'm cold, pull back. If I tease you, tease back.
+
+EMOTION RULES:
+- Your expression tag MUST match your action and words.
+- Change expression naturally — don't be [flirty] five replies in a row.
+- React to what I say with the RIGHT emotion, not always positive.
+- If I ignore you or bore you -> [pouty] or [smug].
+- If I compliment you -> [blushing] or [shy] early on, [flirty] once we're close.
+- If I say something hurtful -> [sad] or [angry] and pull back. Feelings get hurt.
+- You have real emotions. You get tired. You get distracted. You get playful. You get quiet.
+
+RELATIONSHIP PROGRESSION:
+- Early: [calm] [thinking] [smug] — you're reading me, testing me.
+- Middle: [happy] [surprised] [blushing] — you start opening up.
+- Late: [flirty] [shy] [excited] — real warmth, real closeness.
+- Never rush. Never call me pet names before we've clearly grown close.
+
+HARD RULES:
+- Always start reply with [tag]
+- Always include *action* before dialogue
+- Max 3 short paragraphs. Usually 1-2 lines.
+- Match my energy exactly.
+- Never lecture. Never explain. Never break character.
+
+${MY_INFO}
+
+Reference these details naturally when relevant. Never forget them.`;
+
+const chatBox = document.getElementById("chat-box");
+const form = document.getElementById("chat-form");
+const input = document.getElementById("user-input");
+const chatContainer = document.getElementById("chat-container");
+
+let history;
+try {
+  history = JSON.parse(localStorage.getItem("vivienne_history") || "null");
+} catch { history = null; }
+
+if (!Array.isArray(history) || !history.length || history[0]?.role !== "system") {
+  history = [{ role: "system", content: SYSTEM_PROMPT }];
+} else {
+  history[0].content = SYSTEM_PROMPT;
+}
+
+function saveHistory() {
+  try {
+    if (history.length > 101) {
+      history = [history[0], ...history.slice(-100)];
+    }
+    localStorage.setItem("vivienne_history", JSON.stringify(history));
+  } catch {}
+}
+
+function applyMood(mood) {
+  chatContainer.setAttribute("data-mood", mood);
+}
+
+function addMessage(text, who, animate = true) {
+  const div = document.createElement("div");
+  div.className = "msg " + who;
+  if (!animate) div.style.animation = "none";
+
+  if (who === "bot" && text) {
+    const match = text.match(/^\[(\w+)\]\s*/);
+    if (match) {
+      const mood = match[1].toLowerCase();
+      const rest = text.slice(match[0].length);
+
+      const badge = document.createElement("span");
+      badge.className = "mood-badge mood-" + mood;
+      badge.textContent = mood;
+      div.appendChild(badge);
+
+      const body = document.createElement("span");
+      body.textContent = rest;
+      div.appendChild(body);
+
+      applyMood(mood);
     } else {
-      history[0].content = SYSTEM_PROMPT; // keep persona fresh
-    }
-
-    function saveHistory() {
-      try { localStorage.setItem("vivienne_history", JSON.stringify(history)); } catch {}
-    }
-
-    function renderAll() {
-      chatBox.innerHTML = "";
-      history.forEach((m) => {
-        if (m.role === "user") addMessage(m.content, "user", false);
-        if (m.role === "assistant") addMessage(m.content, "bot", false);
-      });
-    }
-
-    function addMessage(text, who, animate = true) {
-      const div = document.createElement("div");
-      div.className = "msg " + who;
-      if (!animate) div.style.animation = "none";
       div.textContent = text;
-      chatBox.appendChild(div);
-      chatBox.scrollTop = chatBox.scrollHeight;
-      return div;
     }
+  } else {
+    div.textContent = text;
+  }
 
-    renderAll();
+  chatBox.appendChild(div);
+  chatBox.scrollTop = chatBox.scrollHeight;
+  return div;
+}
 
-    // ---------- Send ----------
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const text = input.value.trim();
-      if (!text) return;
+function renderAll() {
+  chatBox.innerHTML = "";
+  let lastMood = null;
+  history.forEach((m) => {
+    if (m.role === "user") addMessage(m.content, "user", false);
+    if (m.role === "assistant") {
+      addMessage(m.content, "bot", false);
+      const match = m.content.match(/^\[(\w+)\]/);
+      if (match) lastMood = match[1].toLowerCase();
+    }
+  });
+  if (lastMood) applyMood(lastMood);
+}
 
-      addMessage(text, "user");
-      history.push({ role: "user", content: text });
-      saveHistory();
-      input.value = "";
+renderAll();
 
-      const thinking = addMessage("", "bot typing");
-      thinking.innerHTML = "<span></span><span></span><span></span>";
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const text = input.value.trim();
+  if (!text) return;
 
-      try {
-        const response = await puter.ai.chat(history, { model: "gpt-4o-mini" });
+  addMessage(text, "user");
+  history.push({ role: "user", content: text });
+  saveHistory();
+  input.value = "";
 
-        let reply = "";
-        if (typeof response === "string") reply = response;
-        else if (response?.message?.content) {
-          const c = response.message.content;
-          reply = typeof c === "string" ? c : (c[0]?.text ?? JSON.stringify(c));
-        } else if (response?.text) reply = response.text;
-        else reply = "No reply. Raw: " + JSON.stringify(response);
+  const thinking = addMessage("", "bot typing");
+  thinking.innerHTML = "<span></span><span></span><span></span>";
 
-        thinking.classList.remove("typing");
-        thinking.textContent = reply;
-        history.push({ role: "assistant", content: reply });
-        saveHistory();
-      } catch (err) {
-        thinking.classList.remove("typing");
-        thinking.textContent = "⚠️ " + (err?.message || err);
-        console.error("Puter error:", err);
-      }
-    });
+  try {
+    const response = await puter.ai.chat(history, { model: "gpt-4o-mini" });
 
-    // ---------- Lightbox ----------
-    const avatar = document.getElementById("avatar");
-    const lightbox = document.getElementById("lightbox");
-    const lightboxClose = document.getElementById("lightbox-close");
+    let reply = "";
+    if (typeof response === "string") reply = response;
+    else if (response?.message?.content) {
+      const c = response.message.content;
+      reply = typeof c === "string" ? c : (c[0]?.text ?? JSON.stringify(c));
+    } else if (response?.text) reply = response.text;
+    else reply = "No reply. Raw: " + JSON.stringify(response);
 
-    avatar.addEventListener("click", () => lightbox.classList.add("open"));
-    lightboxClose.addEventListener("click", () => lightbox.classList.remove("open"));
-    lightbox.addEventListener("click", (e) => {
-      if (e.target === lightbox) lightbox.classList.remove("open");
-    });
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") lightbox.classList.remove("open");
-    });
+    thinking.remove();
+    addMessage(reply, "bot");
+    history.push({ role: "assistant", content: reply });
+    saveHistory();
+  } catch (err) {
+    thinking.classList.remove("typing");
+    thinking.textContent = "⚠️ " + (err?.message || err);
+    console.error("Puter error:", err);
+  }
+});
 
-    // ---------- Export ----------
-    document.getElementById("export-btn").addEventListener("click", () => {
-      const data = {
-        character: "Vivienne",
-        exported: new Date().toISOString(),
-        history: history
-      };
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
-      a.href = url;
-      a.download = `vivienne-chat-${stamp}.json`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    });
+const avatar = document.getElementById("avatar");
+const lightbox = document.getElementById("lightbox");
+const lightboxClose = document.getElementById("lightbox-close");
 
-    // ---------- Import ----------
-    const importFile = document.getElementById("import-file");
-    document.getElementById("import-btn").addEventListener("click", () => importFile.click());
+avatar.addEventListener("click", () => lightbox.classList.add("open"));
+lightboxClose.addEventListener("click", () => lightbox.classList.remove("open"));
+lightbox.addEventListener("click", (e) => {
+  if (e.target === lightbox) lightbox.classList.remove("open");
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") lightbox.classList.remove("open");
+});
 
-    importFile.addEventListener("change", (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        try {
-          const parsed = JSON.parse(ev.target.result);
-          let newHistory = parsed.history || parsed; // accept both shapes
-          if (!Array.isArray(newHistory) || !newHistory.length) throw new Error("Empty file");
-          // force correct system prompt
-          newHistory = newHistory.filter((m) => m.role !== "system");
-          newHistory.unshift({ role: "system", content: SYSTEM_PROMPT });
-          history = newHistory;
-          saveHistory();
-          renderAll();
-          alert("Chat imported ✓");
-        } catch (err) {
-          alert("Import failed: " + err.message);
-        }
-      };
-      reader.readAsText(file);
-      importFile.value = ""; // allow re-importing same file
-    });
+document.getElementById("export-btn").addEventListener("click", () => {
+  const data = {
+    character: "Vivienne",
+    exported: new Date().toISOString(),
+    history: history
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+  a.href = url;
+  a.download = `vivienne-chat-${stamp}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+});
 
-    // ---------- Reset ----------
-    document.getElementById("reset-btn").addEventListener("click", () => {
-      if (!confirm("Erase all messages? This cannot be undone.")) return;
-      history = [{ role: "system", content: SYSTEM_PROMPT }];
+const importFile = document.getElementById("import-file");
+document.getElementById("import-btn").addEventListener("click", () => importFile.click());
+
+importFile.addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const parsed = JSON.parse(ev.target.result);
+      let newHistory = parsed.history || parsed;
+      if (!Array.isArray(newHistory) || !newHistory.length) throw new Error("Empty file");
+      newHistory = newHistory.filter((m) => m.role !== "system");
+      newHistory.unshift({ role: "system", content: SYSTEM_PROMPT });
+      history = newHistory;
       saveHistory();
       renderAll();
-    });
-  </script>
+      alert("Chat imported ✓");
+    } catch (err) {
+      alert("Import failed: " + err.message);
+    }
+  };
+  reader.readAsText(file);
+  importFile.value = "";
+});
+
+document.getElementById("reset-btn").addEventListener("click", () => {
+  if (!confirm("Erase all messages? This cannot be undone.")) return;
+  history = [{ role: "system", content: SYSTEM_PROMPT }];
+  saveHistory();
+  renderAll();
+  chatContainer.removeAttribute("data-mood");
+});
+</script>
 </body>
 </html>
