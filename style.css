@@ -5,6 +5,7 @@
   --glass-border: rgba(255, 255, 255, 0.14);
   --text: #eaf6ff;
   --text-dim: rgba(234, 246, 255, 0.55);
+  --mood-color: #00e5ff;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -20,8 +21,6 @@ body {
   overflow: hidden;
   background: #05060a;
 }
-
-/* ---------- Background layers ---------- */
 
 .bg-image {
   position: fixed;
@@ -51,8 +50,6 @@ body {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* ---------- Glass panel ---------- */
-
 .chat-container {
   position: relative;
   z-index: 3;
@@ -71,9 +68,32 @@ body {
     0 0 40px rgba(0, 229, 255, 0.10),
     0 0 80px rgba(177, 74, 255, 0.08),
     0 30px 60px rgba(0,0,0,0.6);
+  transition: border-color 0.6s ease, box-shadow 0.6s ease;
 }
 
-/* ---------- Header ---------- */
+.chat-container[data-mood] {
+  border-color: var(--mood-color);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.03) inset,
+    0 0 60px var(--mood-color),
+    0 0 100px var(--mood-color),
+    0 30px 60px rgba(0,0,0,0.6);
+}
+
+.chat-container[data-mood="happy"]     { --mood-color: #ffe066; }
+.chat-container[data-mood="shy"]       { --mood-color: #ffb3d9; }
+.chat-container[data-mood="flirty"]    { --mood-color: #ff5c8a; }
+.chat-container[data-mood="sad"]       { --mood-color: #7aa2ff; }
+.chat-container[data-mood="angry"]     { --mood-color: #ff5252; }
+.chat-container[data-mood="surprised"] { --mood-color: #ffa94d; }
+.chat-container[data-mood="thinking"]  { --mood-color: #b197ff; }
+.chat-container[data-mood="sleepy"]    { --mood-color: #9ab0c9; }
+.chat-container[data-mood="pouty"]     { --mood-color: #ff9ecb; }
+.chat-container[data-mood="excited"]   { --mood-color: #63ffd1; }
+.chat-container[data-mood="blushing"]  { --mood-color: #ff7bb5; }
+.chat-container[data-mood="smug"]      { --mood-color: #ffd166; }
+.chat-container[data-mood="worried"]   { --mood-color: #a5c8ff; }
+.chat-container[data-mood="calm"]      { --mood-color: #8be9fd; }
 
 .chat-header {
   display: flex;
@@ -91,17 +111,17 @@ body {
   background: url("character.jpeg") center / cover;
   box-shadow:
     0 0 0 1px rgba(255,255,255,0.2),
-    0 0 16px rgba(0, 229, 255, 0.6),
+    0 0 16px var(--mood-color, #00e5ff),
     0 0 30px rgba(177, 74, 255, 0.4);
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.3s;
+  transition: transform 0.2s, box-shadow 0.6s ease;
 }
 
 .avatar:hover {
   transform: scale(1.08);
   box-shadow:
     0 0 0 1px rgba(255,255,255,0.3),
-    0 0 24px rgba(0, 229, 255, 0.9),
+    0 0 24px var(--mood-color, #00e5ff),
     0 0 48px rgba(177, 74, 255, 0.6);
 }
 
@@ -142,8 +162,6 @@ body {
   50% { opacity: 0.4; }
 }
 
-/* ---------- Header action buttons ---------- */
-
 .header-actions {
   display: flex;
   gap: 6px;
@@ -171,8 +189,6 @@ body {
 }
 
 .icon-btn:active { transform: translateY(0) scale(0.95); }
-
-/* ---------- Chat area ---------- */
 
 .chat-box {
   flex: 1;
@@ -227,7 +243,6 @@ body {
   box-shadow: 0 0 20px rgba(0, 229, 255, 0.08);
 }
 
-/* Typing dots */
 .msg.typing {
   display: inline-flex;
   gap: 5px;
@@ -256,7 +271,40 @@ body {
   40% { opacity: 1; transform: translateY(-3px); }
 }
 
-/* ---------- Input form ---------- */
+.mood-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  margin-right: 8px;
+  vertical-align: middle;
+  border: 1px solid currentColor;
+  box-shadow: 0 0 10px currentColor;
+  animation: moodPulse 3s infinite ease-in-out;
+}
+
+@keyframes moodPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.65; }
+}
+
+.mood-happy      { color: #ffe066; }
+.mood-shy        { color: #ffb3d9; }
+.mood-flirty     { color: #ff5c8a; }
+.mood-sad        { color: #7aa2ff; }
+.mood-angry      { color: #ff5252; }
+.mood-surprised  { color: #ffa94d; }
+.mood-thinking   { color: #b197ff; }
+.mood-sleepy     { color: #9ab0c9; }
+.mood-pouty      { color: #ff9ecb; }
+.mood-excited    { color: #63ffd1; }
+.mood-blushing   { color: #ff7bb5; }
+.mood-smug       { color: #ffd166; }
+.mood-worried    { color: #a5c8ff; }
+.mood-calm       { color: #8be9fd; }
 
 .chat-form {
   display: flex;
@@ -314,8 +362,6 @@ body {
 
 .chat-form button:active { transform: translateY(0) scale(0.97); }
 
-/* ---------- Lightbox ---------- */
-
 .lightbox {
   position: fixed;
   inset: 0;
@@ -367,8 +413,6 @@ body {
   transform: rotate(90deg);
   color: var(--neon);
 }
-
-/* ---------- Mobile ---------- */
 
 @media (max-width: 520px) {
   .chat-container {
