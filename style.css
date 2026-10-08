@@ -25,7 +25,7 @@ body {
 .bg-image {
   position: fixed;
   inset: 0;
-  background: url("character.png") center / cover no-repeat;
+  background: url("character.jpg") center / cover no-repeat;
   filter: brightness(0.5) saturate(1.1);
   z-index: 0;
 }
@@ -88,11 +88,21 @@ body {
   width: 46px;
   height: 46px;
   border-radius: 50%;
-  background: url("character.png") center / cover;
+  background: url("character.jpg") center / cover;
   box-shadow:
     0 0 0 1px rgba(255,255,255,0.2),
     0 0 16px rgba(0, 229, 255, 0.6),
     0 0 30px rgba(177, 74, 255, 0.4);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.3s;
+}
+
+.avatar:hover {
+  transform: scale(1.08);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.3),
+    0 0 24px rgba(0, 229, 255, 0.9),
+    0 0 48px rgba(177, 74, 255, 0.6);
 }
 
 .header-text h1 {
@@ -261,9 +271,67 @@ body {
 
 .chat-form button:active { transform: translateY(0) scale(0.97); }
 
+/* Lightbox */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
+}
+
+.lightbox.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.lightbox-img {
+  max-width: 90vw;
+  max-height: 88vh;
+  border-radius: 16px;
+  object-fit: contain;
+
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.15),
+    0 0 40px rgba(0, 229, 255, 0.5),
+    0 0 80px rgba(177, 74, 255, 0.4);
+  animation: zoomIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes zoomIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 28px;
+  font-size: 42px;
+  line-height: 1;
+  color: #fff;
+  cursor: pointer;
+  user-select: none;
+  text-shadow: 0 0 16px rgba(0, 229, 255, 0.9);
+  transition: transform 0.2s, color 0.2s;
+}
+
+.lightbox-close:hover {
+  transform: rotate(90deg);
+  color: var(--neon);
+}
+
 /* Mobile */
 @media (max-width: 520px) {
   .chat-container { height: 92vh; border-radius: 16px; padding: 12px; }
   .msg { max-width: 88%; font-size: 14px; }
   .header-text h1 { font-size: 15px; }
-  }
+}
