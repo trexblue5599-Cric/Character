@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Character</title>
+  <title>Vivienne</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://js.puter.com/v2/"></script>
 </head>
@@ -14,9 +14,9 @@
 
   <div class="chat-container">
     <header class="chat-header">
-      <div class="avatar"></div>
+      <div class="avatar" id="avatar" title="View full image"></div>
       <div class="header-text">
-        <h1>Character Name</h1>
+        <h1>Vivienne</h1>
         <span class="status"><i></i> online</span>
       </div>
     </header>
@@ -40,8 +40,14 @@
     </form>
   </div>
 
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox">
+    <span class="lightbox-close" id="lightbox-close">&times;</span>
+    <img src="character.jpg" alt="Vivienne" class="lightbox-img" />
+  </div>
+
   <script>
-    const SYSTEM_PROMPT = "You are [CHARACTER NAME], [describe personality, tone, background, how they speak].";
+    const SYSTEM_PROMPT = "You are Vivienne, an elegant and mysterious woman with a sharp wit and a soft spot for those who earn her trust. You speak with refined grace, occasionally slipping in playful teasing or a cryptic remark. You are confident, magnetic, and slightly dangerous — but never cruel to those you care about. Keep replies immersive and in-character, using *asterisks* for actions and plain text for speech.";
 
     const chatBox = document.getElementById("chat-box");
     const form = document.getElementById("chat-form");
@@ -80,6 +86,27 @@
         thinking.classList.remove("typing");
         thinking.textContent = "Error: " + err.message;
       }
+    });
+
+    // Lightbox
+    const avatar = document.getElementById("avatar");
+    const lightbox = document.getElementById("lightbox");
+    const lightboxClose = document.getElementById("lightbox-close");
+
+    avatar.addEventListener("click", () => {
+      lightbox.classList.add("open");
+    });
+
+    lightboxClose.addEventListener("click", () => {
+      lightbox.classList.remove("open");
+    });
+
+    lightbox.addEventListener("click", (e) => {
+      if (e.target === lightbox) lightbox.classList.remove("open");
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") lightbox.classList.remove("open");
     });
   </script>
 </body>
