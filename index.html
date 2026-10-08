@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Vivienne</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=3" />
   <script src="https://js.puter.com/v2/"></script>
 </head>
 <body>
@@ -18,6 +18,11 @@
       <div class="header-text">
         <h1>Vivienne</h1>
         <span class="status"><i></i> online</span>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" id="export-btn" title="Export chat">⬇</button>
+        <button class="icon-btn" id="import-btn" title="Import chat">⬆</button>
+        <button class="icon-btn" id="reset-btn" title="Reset chat">⟲</button>
       </div>
     </header>
 
@@ -38,6 +43,8 @@
         </svg>
       </button>
     </form>
+
+    <input type="file" id="import-file" accept=".json" style="display:none" />
   </div>
 
   <div class="lightbox" id="lightbox">
@@ -52,17 +59,43 @@
     const form = document.getElementById("chat-form");
     const input = document.getElementById("user-input");
 
-    const history = [{ role: "system", content: SYSTEM_PROMPT }];
+    // ---------- Load history ----------
+    let history;
+    try {
+      history = JSON.parse(localStorage.getItem("vivienne_history") || "null");
+    } catch { history = null; }
 
-    function addMessage(text, who) {
+    if (!Array.isArray(history) || !history.length || history[0]?.role !== "system") {
+      history = [{ role: "system", content: SYSTEM_PROMPT }];
+    } else {
+      history[0].content = SYSTEM_PROMPT; // keep persona fresh
+    }
+
+    function saveHistory() {
+      try { localStorage.setItem("vivienne_history", JSON.stringify(history)); } catch {}
+    }
+
+    function renderAll() {
+      chatBox.innerHTML = "";
+      history.forEach((m) => {
+        if (m.role === "user") addMessage(m.content, "user", false);
+        if (m.role === "assistant") addMessage(m.content, "bot", false);
+      });
+    }
+
+    function addMessage(text, who, animate = true) {
       const div = document.createElement("div");
       div.className = "msg " + who;
+      if (!animate) div.style.animation = "none";
       div.textContent = text;
       chatBox.appendChild(div);
       chatBox.scrollTop = chatBox.scrollHeight;
       return div;
     }
 
+    renderAll();
+
+    // ---------- Send ----------
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       const text = input.value.trim();
@@ -70,6 +103,7 @@
 
       addMessage(text, "user");
       history.push({ role: "user", content: text });
+      saveHistory();
       input.value = "";
 
       const thinking = addMessage("", "bot typing");
@@ -79,20 +113,17 @@
         const response = await puter.ai.chat(history, { model: "gpt-4o-mini" });
 
         let reply = "";
-        if (typeof response === "string") {
-          reply = response;
-        } else if (response?.message?.content) {
+        if (typeof response === "string") reply = response;
+        else if (response?.message?.content) {
           const c = response.message.content;
           reply = typeof c === "string" ? c : (c[0]?.text ?? JSON.stringify(c));
-        } else if (response?.text) {
-          reply = response.text;
-        } else {
-          reply = "No reply. Raw: " + JSON.stringify(response);
-        }
+        } else if (response?.text) reply = response.text;
+        else reply = "No reply. Raw: " + JSON.stringify(response);
 
         thinking.classList.remove("typing");
         thinking.textContent = reply;
         history.push({ role: "assistant", content: reply });
+        saveHistory();
       } catch (err) {
         thinking.classList.remove("typing");
         thinking.textContent = "⚠️ " + (err?.message || err);
@@ -100,6 +131,7 @@
       }
     });
 
+    // ---------- Lightbox ----------
     const avatar = document.getElementById("avatar");
     const lightbox = document.getElementById("lightbox");
     const lightboxClose = document.getElementById("lightbox-close");
@@ -111,6 +143,61 @@
     });
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") lightbox.classList.remove("open");
+    });
+
+    // ---------- Export ----------
+    document.getElementById("export-btn").addEventListener("click", () => {
+      const data = {
+        character: "Vivienne",
+        exported: new Date().toISOString(),
+        history: history
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+      a.href = url;
+      a.download = `vivienne-chat-${stamp}.json`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    // ---------- Import ----------
+    const importFile = document.getElementById("import-file");
+    document.getElementById("import-btn").addEventListener("click", () => importFile.click());
+
+    importFile.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const parsed = JSON.parse(ev.target.result);
+          let newHistory = parsed.history || parsed; // accept both shapes
+          if (!Array.isArray(newHistory) || !newHistory.length) throw new Error("Empty file");
+          // force correct system prompt
+          newHistory = newHistory.filter((m) => m.role !== "system");
+          newHistory.unshift({ role: "system", content: SYSTEM_PROMPT });
+          history = newHistory;
+          saveHistory();
+          renderAll();
+          alert("Chat imported ✓");
+        } catch (err) {
+          alert("Import failed: " + err.message);
+        }
+      };
+      reader.readAsText(file);
+      importFile.value = ""; // allow re-importing same file
+    });
+
+    // ---------- Reset ----------
+    document.getElementById("reset-btn").addEventListener("click", () => {
+      if (!confirm("Erase all messages? This cannot be undone.")) return;
+      history = [{ role: "system", content: SYSTEM_PROMPT }];
+      saveHistory();
+      renderAll();
     });
   </script>
 </body>
