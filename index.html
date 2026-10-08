@@ -40,10 +40,9 @@
     </form>
   </div>
 
-  <!-- Lightbox -->
   <div class="lightbox" id="lightbox">
     <span class="lightbox-close" id="lightbox-close">&times;</span>
-    <img src="character.jpg" alt="Vivienne" class="lightbox-img" />
+    <img src="character.jpeg" alt="Vivienne" class="lightbox-img" />
   </div>
 
   <script>
@@ -77,34 +76,39 @@
       thinking.innerHTML = "<span></span><span></span><span></span>";
 
       try {
-        const response = await puter.ai.chat(history, { model: "gpt-4o" });
-        const reply = response.message.content[0].text;
+        const response = await puter.ai.chat(history, { model: "gpt-4o-mini" });
+
+        let reply = "";
+        if (typeof response === "string") {
+          reply = response;
+        } else if (response?.message?.content) {
+          const c = response.message.content;
+          reply = typeof c === "string" ? c : (c[0]?.text ?? JSON.stringify(c));
+        } else if (response?.text) {
+          reply = response.text;
+        } else {
+          reply = "No reply. Raw: " + JSON.stringify(response);
+        }
+
         thinking.classList.remove("typing");
         thinking.textContent = reply;
         history.push({ role: "assistant", content: reply });
       } catch (err) {
         thinking.classList.remove("typing");
-        thinking.textContent = "Error: " + err.message;
+        thinking.textContent = "⚠️ " + (err?.message || err);
+        console.error("Puter error:", err);
       }
     });
 
-    // Lightbox
     const avatar = document.getElementById("avatar");
     const lightbox = document.getElementById("lightbox");
     const lightboxClose = document.getElementById("lightbox-close");
 
-    avatar.addEventListener("click", () => {
-      lightbox.classList.add("open");
-    });
-
-    lightboxClose.addEventListener("click", () => {
-      lightbox.classList.remove("open");
-    });
-
+    avatar.addEventListener("click", () => lightbox.classList.add("open"));
+    lightboxClose.addEventListener("click", () => lightbox.classList.remove("open"));
     lightbox.addEventListener("click", (e) => {
       if (e.target === lightbox) lightbox.classList.remove("open");
     });
-
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") lightbox.classList.remove("open");
     });
