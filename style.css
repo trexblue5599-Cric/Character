@@ -120,7 +120,7 @@ body {
   height: 48px;
   border-radius: 50%;
   flex-shrink: 0;
-  background: url("character.jpeg") center / cover; /* <--- CHANGE 'character.jpeg' TO YOUR EXACT FILENAME */
+  background: url("selene.jpeg") center / cover; /* <--- CHANGE 'character.jpeg' TO YOUR EXACT FILENAME */
   box-shadow:
     0 0 0 2px rgba(255,255,255,0.2),
     0 0 20px var(--mood-color, #f0f4f8),
