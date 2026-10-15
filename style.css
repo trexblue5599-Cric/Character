@@ -23,7 +23,6 @@ body {
   background: #030507;
 }
 
-/* Background image - Brightened so you can see her */
 .bg-image {
   position: fixed;
   inset: 0;
@@ -32,7 +31,6 @@ body {
   z-index: 0;
 }
 
-/* Lovely glassy glow overlay */
 .bg-glow {
   position: fixed;
   inset: 0;
@@ -59,7 +57,6 @@ body {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* Glass Container - Now with a softer, prettier look */
 .chat-container {
   position: relative;
   z-index: 3;
@@ -90,21 +87,23 @@ body {
     0 30px 60px rgba(0,0,0,0.7);
 }
 
-/* Mood Colors - Silver & Teal */
-.chat-container[data-mood="happy"]     { --mood-color: #f0f4f8; }
-.chat-container[data-mood="shy"]       { --mood-color: #b8e6e8; }
-.chat-container[data-mood="flirty"]    { --mood-color: #00d4e0; }
-.chat-container[data-mood="sad"]       { --mood-color: #6b7a8a; }
-.chat-container[data-mood="angry"]     { --mood-color: #2d8a96; }
-.chat-container[data-mood="surprised"] { --mood-color: #80d4db; }
-.chat-container[data-mood="thinking"]  { --mood-color: #a0c4cc; }
-.chat-container[data-mood="sleepy"]    { --mood-color: #8c8f9e; }
-.chat-container[data-mood="pouty"]     { --mood-color: #66bcc4; }
-.chat-container[data-mood="excited"]   { --mood-color: #00d4e0; }
-.chat-container[data-mood="blushing"]  { --mood-color: #5cb8c0; }
-.chat-container[data-mood="smug"]      { --mood-color: #b5a8d9; }
-.chat-container[data-mood="worried"]   { --mood-color: #9a9ebf; }
-.chat-container[data-mood="calm"]      { --mood-color: #b8c0d9; }
+/* ============ DISTINCT MOOD COLORS ============ */
+.chat-container[data-mood="happy"]     { --mood-color: #ffd93d; } /* Warm Gold */
+.chat-container[data-mood="shy"]       { --mood-color: #ffb3d9; } /* Soft Pink */
+.chat-container[data-mood="flirty"]    { --mood-color: #ff4d6d; } /* Hot Rose */
+.chat-container[data-mood="sad"]       { --mood-color: #6b8cff; } /* Deep Blue */
+.chat-container[data-mood="angry"]     { --mood-color: #ff3b30; } /* Fiery Red */
+.chat-container[data-mood="surprised"] { --mood-color: #ff9f1c; } /* Bright Orange */
+.chat-container[data-mood="thinking"]  { --mood-color: #b197ff; } /* Lavender */
+.chat-container[data-mood="sleepy"]    { --mood-color: #9ca3af; } /* Grey Blue */
+.chat-container[data-mood="pouty"]     { --mood-color: #ff8fab; } /* Bubblegum Pink */
+.chat-container[data-mood="excited"]   { --mood-color: #00ffb3; } /* Neon Mint */
+.chat-container[data-mood="blushing"]  { --mood-color: #ff7096; } /* Warm Pink */
+.chat-container[data-mood="smug"]      { --mood-color: #ffc300; } /* Amber */
+.chat-container[data-mood="worried"]   { --mood-color: #8ecae6; } /* Pale Sky Blue */
+.chat-container[data-mood="calm"]      { --mood-color: #7de2d1; } /* Soft Aqua */
+.chat-container[data-mood="gentle"]    { --mood-color: #c8e6c9; } /* Soft Sage */
+.chat-container[data-mood="playful"]   { --mood-color: #ff9ff3; } /* Bright Magenta */
 
 .chat-header {
   display: flex;
@@ -114,13 +113,12 @@ body {
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
-/* Avatar - Fix this to match the filename! */
 .avatar {
   width: 48px;
   height: 48px;
   border-radius: 50%;
   flex-shrink: 0;
-  background: url("selene.jpeg") center / cover; /* <--- CHANGE 'character.jpeg' TO YOUR EXACT FILENAME */
+  background: url("selene.jpeg") center / cover;
   box-shadow:
     0 0 0 2px rgba(255,255,255,0.2),
     0 0 20px var(--mood-color, #f0f4f8),
@@ -229,7 +227,6 @@ body {
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* User Bubble - Soft Silver to Deep Teal */
 .msg.user {
   align-self: flex-end;
   color: #fff;
@@ -240,7 +237,6 @@ body {
   border-bottom-right-radius: 6px;
 }
 
-/* Bot Bubble - Glassy and soft */
 .msg.bot {
   align-self: flex-start;
   color: var(--text);
@@ -299,20 +295,23 @@ body {
   50% { opacity: 0.7; }
 }
 
-.mood-happy      { color: #f0f4f8; }
-.mood-shy        { color: #b8e6e8; }
-.mood-flirty     { color: #00d4e0; }
-.mood-sad        { color: #6b7a8a; }
-.mood-angry      { color: #2d8a96; }
-.mood-surprised  { color: #80d4db; }
-.mood-thinking   { color: #a0c4cc; }
-.mood-sleepy     { color: #8c8f9e; }
-.mood-pouty      { color: #66bcc4; }
-.mood-excited    { color: #00d4e0; }
-.mood-blushing   { color: #5cb8c0; }
-.mood-smug       { color: #b5a8d9; }
-.mood-worried    { color: #9a9ebf; }
-.mood-calm       { color: #b8c0d9; }
+/* ============ DISTINCT MOOD BADGE COLORS ============ */
+.mood-happy      { color: #ffd93d; }
+.mood-shy        { color: #ffb3d9; }
+.mood-flirty     { color: #ff4d6d; }
+.mood-sad        { color: #6b8cff; }
+.mood-angry      { color: #ff3b30; }
+.mood-surprised  { color: #ff9f1c; }
+.mood-thinking   { color: #b197ff; }
+.mood-sleepy     { color: #9ca3af; }
+.mood-pouty      { color: #ff8fab; }
+.mood-excited    { color: #00ffb3; }
+.mood-blushing   { color: #ff7096; }
+.mood-smug       { color: #ffc300; }
+.mood-worried    { color: #8ecae6; }
+.mood-calm       { color: #7de2d1; }
+.mood-gentle     { color: #c8e6c9; }
+.mood-playful    { color: #ff9ff3; }
 
 .chat-form {
   display: flex;
@@ -345,7 +344,6 @@ body {
 
 .chat-form input::placeholder { color: var(--text-dim); }
 
-/* Send Button - Beautiful Silver/Teal Gradient */
 .chat-form button {
   display: grid;
   place-items: center;
@@ -437,4 +435,4 @@ body {
   .avatar { width: 44px; height: 44px; }
   .chat-form input { padding: 10px; font-size: 14px; }
   .chat-form button { width: 44px; height: 44px; border-radius: 12px; }
-        }
+  }
