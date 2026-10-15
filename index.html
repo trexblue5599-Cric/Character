@@ -20,6 +20,10 @@
       <span class="status"><i></i> online</span>
     </div>
     <div class="header-actions">
+      <select id="model-select" class="model-select" title="Choose AI model">
+        <option value="cognitivecomputations/dolphin-mistral-24b-venice-edition">Dolphin</option>
+        <option value="qwen/qwen3.8-27b-abliterated-cyber:free">Qwen Cyber</option>
+      </select>
       <button class="icon-btn" id="export-btn" title="Export chat">⬇</button>
       <button class="icon-btn" id="import-btn" title="Import chat">⬆</button>
       <button class="icon-btn" id="reset-btn" title="Reset chat">⟲</button>
@@ -128,8 +132,9 @@ const SEED = [
   { role: "system", content: SYSTEM_PROMPT }
 ];
 
-/* ============ MODEL — UNCENSORED ============ */
-const MODEL = "cognitivecomputations/dolphin-mistral-24b-venice-edition";
+/* ============ MODEL — DEFAULT ============ */
+const DEFAULT_MODEL = "cognitivecomputations/dolphin-mistral-24b-venice-edition";
+let MODEL = localStorage.getItem("selene_model") || DEFAULT_MODEL;
 
 /* ============ CORE ============ */
 const chatBox = document.getElementById("chat-box");
@@ -344,6 +349,20 @@ importFile.addEventListener("change", (e) => {
   };
   reader.readAsText(file);
   importFile.value = "";
+});
+
+/* ============ MODEL SELECTOR ============ */
+const modelSelect = document.getElementById("model-select");
+
+// Set the dropdown to the currently active model
+modelSelect.value = MODEL;
+
+// When the user switches models, only the MODEL variable changes.
+// `history` is untouched, so the next reply still knows everything.
+modelSelect.addEventListener("change", () => {
+  MODEL = modelSelect.value;
+  localStorage.setItem("selene_model", MODEL);
+  playSound(700, 0.08);
 });
 
 /* ============ RESET ============ */
