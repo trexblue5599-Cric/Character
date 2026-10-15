@@ -88,22 +88,22 @@ body {
 }
 
 /* ============ DISTINCT MOOD COLORS ============ */
-.chat-container[data-mood="happy"]     { --mood-color: #ffd93d; } /* Warm Gold */
-.chat-container[data-mood="shy"]       { --mood-color: #ffb3d9; } /* Soft Pink */
-.chat-container[data-mood="flirty"]    { --mood-color: #ff4d6d; } /* Hot Rose */
-.chat-container[data-mood="sad"]       { --mood-color: #6b8cff; } /* Deep Blue */
-.chat-container[data-mood="angry"]     { --mood-color: #ff3b30; } /* Fiery Red */
-.chat-container[data-mood="surprised"] { --mood-color: #ff9f1c; } /* Bright Orange */
-.chat-container[data-mood="thinking"]  { --mood-color: #b197ff; } /* Lavender */
-.chat-container[data-mood="sleepy"]    { --mood-color: #9ca3af; } /* Grey Blue */
-.chat-container[data-mood="pouty"]     { --mood-color: #ff8fab; } /* Bubblegum Pink */
-.chat-container[data-mood="excited"]   { --mood-color: #00ffb3; } /* Neon Mint */
-.chat-container[data-mood="blushing"]  { --mood-color: #ff7096; } /* Warm Pink */
-.chat-container[data-mood="smug"]      { --mood-color: #ffc300; } /* Amber */
-.chat-container[data-mood="worried"]   { --mood-color: #8ecae6; } /* Pale Sky Blue */
-.chat-container[data-mood="calm"]      { --mood-color: #7de2d1; } /* Soft Aqua */
-.chat-container[data-mood="gentle"]    { --mood-color: #c8e6c9; } /* Soft Sage */
-.chat-container[data-mood="playful"]   { --mood-color: #ff9ff3; } /* Bright Magenta */
+.chat-container[data-mood="happy"]     { --mood-color: #ffd93d; }
+.chat-container[data-mood="shy"]       { --mood-color: #ffb3d9; }
+.chat-container[data-mood="flirty"]    { --mood-color: #ff4d6d; }
+.chat-container[data-mood="sad"]       { --mood-color: #6b8cff; }
+.chat-container[data-mood="angry"]     { --mood-color: #ff3b30; }
+.chat-container[data-mood="surprised"] { --mood-color: #ff9f1c; }
+.chat-container[data-mood="thinking"]  { --mood-color: #b197ff; }
+.chat-container[data-mood="sleepy"]    { --mood-color: #9ca3af; }
+.chat-container[data-mood="pouty"]     { --mood-color: #ff8fab; }
+.chat-container[data-mood="excited"]   { --mood-color: #00ffb3; }
+.chat-container[data-mood="blushing"]  { --mood-color: #ff7096; }
+.chat-container[data-mood="smug"]      { --mood-color: #ffc300; }
+.chat-container[data-mood="worried"]   { --mood-color: #8ecae6; }
+.chat-container[data-mood="calm"]      { --mood-color: #7de2d1; }
+.chat-container[data-mood="gentle"]    { --mood-color: #c8e6c9; }
+.chat-container[data-mood="playful"]   { --mood-color: #ff9ff3; }
 
 .chat-header {
   display: flex;
@@ -169,7 +169,7 @@ body {
   50% { opacity: 0.5; transform: scale(0.9); }
 }
 
-.header-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.header-actions { display: flex; gap: 8px; flex-shrink: 0; align-items: center; }
 
 .icon-btn {
   width: 36px;
@@ -193,6 +193,40 @@ body {
 }
 
 .icon-btn:active { transform: translateY(0) scale(0.95); }
+
+/* ============ MODEL SELECTOR ============ */
+.model-select {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 0 8px;
+  height: 36px;
+  font-size: 11px;
+  font-family: inherit;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+  max-width: 100px;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23f0f4f8' stroke-width='3'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 24px;
+}
+
+.model-select:hover,
+.model-select:focus {
+  border-color: rgba(0, 163, 176, 0.6);
+  background-color: rgba(0, 163, 176, 0.15);
+  box-shadow: 0 0 16px rgba(0, 163, 176, 0.4);
+}
+
+.model-select option {
+  background: #0a0e14;
+  color: #f2f4f8;
+}
 
 .chat-box {
   flex: 1;
@@ -435,4 +469,15 @@ body {
   .avatar { width: 44px; height: 44px; }
   .chat-form input { padding: 10px; font-size: 14px; }
   .chat-form button { width: 44px; height: 44px; border-radius: 12px; }
+  
+  /* Mobile model selector adjustments */
+  .header-actions { gap: 5px; }
+  .model-select {
+    max-width: 75px;
+    font-size: 10px;
+    padding: 0 6px;
+    padding-right: 20px;
+    height: 34px;
+    background-position: right 5px center;
   }
+    }
