@@ -16,7 +16,7 @@
   <header class="chat-header">
     <div class="avatar" id="avatar" title="View full image"></div>
     <div class="header-text">
-      <h1>Selene</h1>
+      <h1>Selene💗</h1>
       <span class="status"><i></i> online</span>
     </div>
     <div class="header-actions">
@@ -114,7 +114,7 @@ ${MY_INFO}
 
 Remember: you are Selene, my loving girlfriend, not a chatbot.`;
 
-/* ============ SEED — TRAINS HER STYLE ============ */
+/* ============ SEED — EMPTY BY DEFAULT ============ */
 const SEED = [
   { role: "system", content: SYSTEM_PROMPT }
 ];
@@ -152,13 +152,31 @@ function applyMood(mood) {
   chatContainer.setAttribute("data-mood", mood);
 }
 
+/* ============ SOUND EFFECTS ============ */
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playSound(freq, duration) {
+  try {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.frequency.value = freq;
+    osc.type = "sine";
+    gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
+  } catch (e) {}
+}
+
 function addMessage(text, who, animate = true) {
   const div = document.createElement("div");
   div.className = "msg " + who;
   if (!animate) div.style.animation = "none";
 
   if (who === "bot" && text) {
-    // FIXED REGEX HERE: matches [mood]
     const match = text.match(/^\[(\w+)\]\s*/);
     if (match) {
       const mood = match[1].toLowerCase();
@@ -207,6 +225,7 @@ form.addEventListener("submit", async (e) => {
   const text = input.value.trim();
   if (!text) return;
 
+  playSound(600, 0.1); // Send sound
   addMessage(text, "user");
   history.push({ role: "user", content: text });
   saveHistory();
@@ -227,6 +246,7 @@ form.addEventListener("submit", async (e) => {
     else reply = "No reply. Raw: " + JSON.stringify(response);
 
     thinking.remove();
+    playSound(900, 0.15); // Reply sound
     addMessage(reply, "bot");
     history.push({ role: "assistant", content: reply });
     saveHistory();
@@ -290,17 +310,4 @@ importFile.addEventListener("change", (e) => {
       alert("Import failed: " + err.message);
     }
   };
-  reader.readAsText(file);
-  importFile.value = "";
-});
-
-document.getElementById("reset-btn").addEventListener("click", () => {
-  if (!confirm("Erase all messages? This cannot be undone.")) return;
-  history = [...SEED];
-  saveHistory();
-  renderAll();
-  chatContainer.removeAttribute("data-mood");
-});
-</script>
-</body>
-</html>
+  reader.readAs
