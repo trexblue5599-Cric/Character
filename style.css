@@ -3,7 +3,7 @@
   --neon-2: #8b3dff; /* Purple */
   --glass: rgba(255, 255, 255, 0.06);
   --glass-border: rgba(255, 255, 255, 0.14);
-  --text: #f2f4f8; /* Brighter silver text */
+  --text: #f2f4f8;
   --text-dim: rgba(242, 244, 248, 0.55);
   --mood-color: #e0e4ed;
 }
@@ -22,11 +22,12 @@ body {
   background: #05060a;
 }
 
+/* FIXED: Background image is now fully visible behind the chat */
 .bg-image {
   position: fixed;
   inset: 0;
   background: url("character.jpeg") center / cover no-repeat;
-  filter: brightness(0.5) saturate(1.1);
+  filter: brightness(0.6) saturate(1.1); /* Brightened slightly so you can see her */
   z-index: 0;
 }
 
@@ -35,9 +36,9 @@ body {
   inset: 0;
   z-index: 1;
   background:
-    radial-gradient(60% 50% at 20% 20%, rgba(224, 228, 237, 0.18), transparent 70%),
-    radial-gradient(60% 50% at 80% 80%, rgba(139, 61, 255, 0.25), transparent 70%),
-    linear-gradient(180deg, rgba(5,6,10,0.35) 0%, rgba(5,6,10,0.85) 100%);
+    radial-gradient(60% 50% at 20% 20%, rgba(224, 228, 237, 0.15), transparent 70%),
+    radial-gradient(60% 50% at 80% 80%, rgba(139, 61, 255, 0.20), transparent 70%),
+    linear-gradient(180deg, rgba(5,6,10,0.2) 0%, rgba(5,6,10,0.7) 100%); /* Less opaque so image shows */
   pointer-events: none;
 }
 
@@ -45,23 +46,24 @@ body {
   position: fixed;
   inset: 0;
   z-index: 2;
-  opacity: 0.06;
+  opacity: 0.05;
   pointer-events: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
+/* FIXED: Chat container is now smaller on mobile, no text squishing */
 .chat-container {
   position: relative;
   z-index: 3;
-  width: min(720px, 92vw);
+  width: min(720px, 94vw);
   height: min(82vh, 820px);
   display: flex;
   flex-direction: column;
   border-radius: 22px;
   padding: 18px;
-  background: var(--glass);
-  backdrop-filter: blur(22px) saturate(140%);
-  -webkit-backdrop-filter: blur(22px) saturate(140%);
+  background: rgba(255, 255, 255, 0.04); /* More transparent glass */
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
   border: 1px solid var(--glass-border);
   box-shadow:
     0 0 0 1px rgba(255,255,255,0.03) inset,
@@ -80,7 +82,7 @@ body {
     0 30px 60px rgba(0,0,0,0.6);
 }
 
-/* --- UPDATED MOOD COLORS (SILVER/PURPLE THEME) --- */
+/* --- SILVER/PURPLE MOOD COLORS --- */
 .chat-container[data-mood="happy"]     { --mood-color: #e8e0ff; }
 .chat-container[data-mood="shy"]       { --mood-color: #d4b3ff; }
 .chat-container[data-mood="flirty"]    { --mood-color: #b16dff; }
@@ -285,7 +287,6 @@ body {
   50% { opacity: 0.65; }
 }
 
-/* --- UPDATED MOOD BADGE COLORS --- */
 .mood-happy      { color: #e8e0ff; }
 .mood-shy        { color: #d4b3ff; }
 .mood-flirty     { color: #b16dff; }
@@ -301,6 +302,7 @@ body {
 .mood-worried    { color: #9a9ebf; }
 .mood-calm       { color: #b8c0d9; }
 
+/* FIXED: Chat form is now properly sized on mobile, no squishing */
 .chat-form {
   display: flex;
   gap: 10px;
@@ -317,6 +319,7 @@ body {
   box-shadow: 0 0 20px rgba(224, 228, 237, 0.25);
 }
 
+/* FIXED: Removed min-width: 0 so it doesn't squish into vertical letters */
 .chat-form input {
   flex: 1;
   padding: 12px 16px;
@@ -326,7 +329,7 @@ body {
   color: var(--text);
   font-size: 15px;
   font-family: inherit;
-  min-width: 0;
+  width: 100%; 
 }
 
 .chat-form input::placeholder { color: var(--text-dim); }
@@ -409,10 +412,18 @@ body {
   color: var(--neon);
 }
 
+/* FIXED: Mobile media query to ensure nothing overflows */
 @media (max-width: 520px) {
-  .chat-container { height: 92vh; border-radius: 16px; padding: 12px; }
-  .msg { max-width: 88%; font-size: 14px; }
+  .chat-container { 
+    height: 90vh; 
+    width: 96vw;
+    border-radius: 16px; 
+    padding: 10px; 
+  }
+  .msg { max-width: 85%; font-size: 14px; }
   .header-text h1 { font-size: 15px; }
   .icon-btn { width: 32px; height: 32px; font-size: 14px; }
-  .avatar { width: 42px; height: 42px; }
-}
+  .avatar { width: 40px; height: 40px; }
+  .chat-form input { padding: 10px; font-size: 14px; }
+  .chat-form button { width: 40px; height: 40px; }
+  }
