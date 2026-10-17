@@ -38,6 +38,11 @@
     <input type="file" id="upload-input" accept="audio/*,video/*" hidden />
   </div>
 
+  <div id="paste-row" class="music-bar" style="display:none;flex-direction:column;align-items:stretch;">
+    <input id="paste-url" class="music-select" type="url" placeholder="Paste the link here" autocomplete="off" style="background-image:none;padding:0 12px;" />
+    <input id="paste-title" class="music-select" type="text" placeholder="Song name (she reads this)" autocomplete="off" style="background-image:none;padding:0 12px;" />
+  </div>
+
   <div id="chat-box" class="chat-box"></div>
 
   <form id="chat-form" class="chat-form">
@@ -108,8 +113,8 @@ const STICKER_NOTE = HAS_STICKERS
    Rename youtube/spotify titles to the real song names. She reads the title.
 */
 const MEDIA = [
-  { title: "Song 1 (YouTube)", type: "youtube", id: "FaKtl2b4TXQ" },
-  { title: "Song 2 (Spotify)", type: "spotify", id: "6oDHAjaJJjwwgoAuMIeY9K" },
+  { title: "🔗 YouTube link", type: "paste", service: "youtube" },
+  { title: "🔗 Spotify link", type: "paste", service: "spotify" },
   // Downloaded songs: folder = song name, file = by<Artist>.mp3
   { type: "file", src: "Bluetheme/byDjprakas.mp3" },
 ];
@@ -481,13 +486,57 @@ function addMediaBubble(m) {
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
+const pasteRow = document.getElementById("paste-row");
+const pasteUrl = document.getElementById("paste-url");
+const pasteTitle = document.getElementById("paste-title");
+
+function noteFor(title) {
+  return `(Firus just put on the song "${title}". You can't hear it, but you know the title, so react to it naturally in character.)`;
+}
+
+// Works out the video or track ID from a pasted link
+function playPasted(service) {
+  const url = pasteUrl.value.trim();
+  const title = pasteTitle.value.trim();
+  let m = null;
+  if (service === "youtube") {
+    const r = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/))([A-Za-z0-9_-]{11})/);
+    if (r) m = { title: title || "YouTube video", type: "youtube", id: r[1] };
+  } else {
+    const r = url.match(/open\.spotify\.com\/(?:intl-[a-z]+\/)?track\/([A-Za-z0-9]+)/);
+    if (r) m = { title: title || "Spotify track", type: "spotify", id: r[1] };
+  }
+  if (!m) {
+    alert(service === "youtube" ? "That doesn't look like a YouTube link." : "That doesn't look like a Spotify track link.");
+    return;
+  }
+  initAudio();
+  addMediaBubble(m);
+  pendingNote = noteFor(m.title);
+  pasteUrl.value = "";
+  pasteTitle.value = "";
+}
+
 musicBtn.addEventListener("click", () => {
   const m = MEDIA[Number(musicSelect.value)];
   if (!m) return;
+  if (m.type === "paste") { playPasted(m.service); return; }
+  pasteRow.style.display = "none";
   initAudio();
   addMediaBubble(m);
-  pendingNote = `(Firus just put on the song "${m.title}". You can't hear it, but you know the title, so react to it naturally in character.)`;
+  pendingNote = noteFor(m.title);
 });
+
+// Show the paste boxes only when a paste option is chosen
+function updatePasteRow() {
+  const m = MEDIA[Number(musicSelect.value)];
+  const isPaste = !!m && m.type === "paste";
+  pasteRow.style.display = isPaste ? "flex" : "none";
+  if (isPaste) pasteUrl.focus();
+}
+musicSelect.addEventListener("change", updatePasteRow);
+updatePasteRow();
+
 
 /* ============ PLAY FROM PHONE ============
    The file stays on the phone. It's played from a temporary local link
