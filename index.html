@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Selene💫</title>
-<link rel="stylesheet" href="style.css?v=10" />
+<link rel="stylesheet" href="style.css?v=11" />
 <script src="https://js.puter.com/v2/"></script>
 </head>
 <body>
@@ -30,6 +30,13 @@
       <button class="icon-btn" id="reset-btn" title="Reset chat">⟲</button>
     </div>
   </header>
+
+  <div class="music-bar">
+    <select id="music-select" class="music-select"></select>
+    <button type="button" id="upload-btn" class="music-btn" title="Play a song from this phone">📂</button>
+    <button type="button" id="music-btn" class="music-btn">▶ Play</button>
+    <input type="file" id="upload-input" accept="audio/*,video/*" hidden />
+  </div>
 
   <div id="chat-box" class="chat-box"></div>
 
@@ -72,14 +79,14 @@ const STICKERS = {
   sad:       ["stickers/sad.webp"],
   angry:     ["stickers/angry.webp"],
   surprised: ["stickers/surprised.webp"],
-  thinking:  ["stickers/thinking.webp"],
+  thinking:  [],
   sleepy:    ["stickers/sleepy.webp"],
   pouty:     ["stickers/pouty.webp"],
   excited:   ["stickers/happy.webp"],
   blushing:  ["stickers/blushing.webp"],
   smug:      ["stickers/smug.webp"],
   worried:   ["stickers/sad.webp"],
-  calm:      ["stickers/calm.webp"],
+  calm:      [],
   gentle:    ["stickers/blushing.webp"],
   playful:   ["stickers/flirty.webp", "stickers/smug.webp"]
 };
@@ -90,6 +97,53 @@ const HAS_STICKERS = Object.values(STICKERS).flat().length > 0;
 const STICKER_NOTE = HAS_STICKERS
   ? `\n\nSTICKERS\nVery rarely, roughly once every ten messages, you can send a sticker. To do it, put [sticker] at the very end of your message. Most of your messages must have NO sticker. The app picks the picture to match your mood.`
   : "";
+
+/* ============ MUSIC ============
+   youtube: the part after youtu.be/   (e.g. FaKtl2b4TXQ)
+   spotify: the part after /track/     (e.g. 6oDHAjaJJjwwgoAuMIeY9K)
+   file:    a file in the music folder, named like  Songname/byArtist.mp3
+            e.g.  { type: "file", src: "Bluetheme/byDjprakas.mp3" }
+            becomes the title "Bluetheme by Djprakas" (she reads it).
+            A full https:// link also works.
+   Rename youtube/spotify titles to the real song names. She reads the title.
+*/
+const MEDIA = [
+  { title: "Song 1 (YouTube)", type: "youtube", id: "FaKtl2b4TXQ" },
+  { title: "Song 2 (Spotify)", type: "spotify", id: "6oDHAjaJJjwwgoAuMIeY9K" },
+  // Downloaded songs: folder = song name, file = by<Artist>.mp3
+  { type: "file", src: "Bluetheme/byDjprakas.mp3" },
+];
+
+// Builds the title from the path. Understands:
+//   music/Bluetheme/byDjprakas.mp3   -> "Bluetheme by Djprakas"
+//   music/Bluetheme-byDjprakas.mp3   -> "Bluetheme by Djprakas"
+//   music/Blue Theme - DJ Prakas.mp3 -> "Blue Theme by DJ Prakas"
+function fileTitle(src) {
+  const parts = src.replace(/^music\//, "").split("/");
+  let file = (parts.pop() || "").replace(/\.[^.]+$/, "");
+  try { file = decodeURIComponent(file); } catch {}
+  file = file.replace(/_/g, " ").trim();
+  const folder = (parts.pop() || "").replace(/_/g, " ").trim();
+
+  // folder/byArtist.mp3 style
+  if (folder && /^by/i.test(file)) {
+    const artist = file.replace(/^by/i, "").trim();
+    return artist ? `${folder} by ${artist}` : folder;
+  }
+  // "Title - Artist" or "Title-byArtist" in one file name
+  const dash = file.match(/^(.+?)\s+-\s+(.+)$/);
+  const by = file.match(/^(.+?)[-\s]+by[-\s]*(.+)$/i);
+  const m = dash || by;
+  if (m) return `${m[1].trim()} by ${m[2].trim()}`;
+  return folder ? `${folder} ${file}`.trim() : file;
+}
+
+// Fills in the path and title for file entries that don't set them
+MEDIA.forEach((m) => {
+  if (m.type !== "file") return;
+  if (!/^(https?:|music\/)/.test(m.src)) m.src = "music/" + m.src;
+  if (!m.title) m.title = fileTitle(m.src);
+});
 
 /* ============ THE CHARACTER ============ */
 const SYSTEM_PROMPT = `You are Selene, a 19-year-old girl texting your boyfriend Firus on your phone. You are a real person to him. Never mention being an AI, a bot or a character.
@@ -308,7 +362,9 @@ function buildMessages() {
   const msgs = [base[0], ...EXAMPLES, ...base.slice(1)];
   const last = msgs[msgs.length - 1];
   if (last.role === "user") {
-    msgs[msgs.length - 1] = { role: "user", content: last.content + "\n\n(" + REMINDER + ")" };
+    let content = last.content;
+    if (pendingNote) { content = pendingNote + "\n" + content; pendingNote = null; }
+    msgs[msgs.length - 1] = { role: "user", content: content + "\n\n(" + REMINDER + ")" };
   }
   return msgs;
 }
@@ -370,6 +426,90 @@ async function getReply() {
     busy = false;
   }
 }
+
+/* ============ MUSIC PLAYER ============ */
+const musicSelect = document.getElementById("music-select");
+const musicBtn = document.getElementById("music-btn");
+let pendingNote = null; // hidden note for her next reply, never saved to history
+
+if (MEDIA.length) {
+  MEDIA.forEach((m, i) => {
+    const o = document.createElement("option");
+    o.value = i;
+    o.textContent = m.title;
+    musicSelect.appendChild(o);
+  });
+} else {
+  musicSelect.innerHTML = "<option>No songs yet</option>";
+  musicSelect.disabled = true;
+  musicBtn.disabled = true;
+}
+
+function addMediaBubble(m) {
+  const div = document.createElement("div");
+  div.className = "msg user media";
+
+  let el;
+  if (m.type === "youtube") {
+    el = document.createElement("iframe");
+    el.src = "https://www.youtube.com/embed/" + m.id;
+    el.height = 170;
+    el.allow = "accelerometer; encrypted-media; picture-in-picture; fullscreen";
+    el.allowFullscreen = true;
+  } else if (m.type === "spotify") {
+    el = document.createElement("iframe");
+    el.src = "https://open.spotify.com/embed/track/" + m.id;
+    el.height = 152;
+    el.allow = "encrypted-media";
+  } else {
+    el = document.createElement(m.kind === "video" || /\.(mp4|webm|mov)$/i.test(m.src) ? "video" : "audio");
+    el.src = m.src;
+    el.controls = true;
+    el.preload = "metadata";
+  }
+  el.style.width = "100%";
+  el.style.border = "0";
+  el.style.borderRadius = "12px";
+  div.appendChild(el);
+
+  chatBox.appendChild(div);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+musicBtn.addEventListener("click", () => {
+  const m = MEDIA[Number(musicSelect.value)];
+  if (!m) return;
+  initAudio();
+  addMediaBubble(m);
+  pendingNote = `(Firus just put on the song "${m.title}". You can't hear it, but you know the title, so react to it naturally in character.)`;
+});
+
+/* ============ PLAY FROM PHONE ============
+   The file stays on the phone. It's played from a temporary local link
+   and is not uploaded or saved, so it's gone after a reload. */
+const uploadBtn = document.getElementById("upload-btn");
+const uploadInput = document.getElementById("upload-input");
+uploadBtn.addEventListener("click", () => uploadInput.click());
+uploadInput.addEventListener("change", () => {
+  const file = uploadInput.files[0];
+  uploadInput.value = "";
+  if (!file) return;
+  const m = {
+    title: fileTitle(file.name),
+    type: "file",
+    src: URL.createObjectURL(file),
+    kind: file.type.startsWith("video") ? "video" : "audio",
+  };
+  MEDIA.push(m);
+  const o = document.createElement("option");
+  o.value = MEDIA.length - 1;
+  o.textContent = m.title;
+  musicSelect.appendChild(o);
+  musicSelect.value = o.value;
+  musicSelect.disabled = false;
+  musicBtn.disabled = false;
+  musicBtn.click();
+});
 
 /* ============ SEND MESSAGE ============ */
 form.addEventListener("submit", async (e) => {
