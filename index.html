@@ -449,6 +449,11 @@ function addMediaBubble(m) {
   const div = document.createElement("div");
   div.className = "msg user media";
 
+  const label = document.createElement("div");
+  label.className = "media-title";
+  label.textContent = m.title;
+  div.appendChild(label);
+
   let el;
   if (m.type === "youtube") {
     el = document.createElement("iframe");
